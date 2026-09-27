@@ -30,6 +30,20 @@ architectural set. Point-by-point confirmation:
 
 ## DRAWING REGISTER
 
+**Presentation sheets (sample visual format — rendered):**
+
+| Sheet | Title | File |
+|-------|-------|------|
+| P1 | Facility sheet: rendered plan + 3D cutaway + side elevation + cross section + data/legend | `drawings/P1_presentation_facility.pdf/.png` |
+| P2 | Concept sheet: plan + front/side elevations + longitudinal + 3D + cross + aerial + schedules | `drawings/P2_presentation_concept.pdf/.png` |
+| — | **Combined presentation (P1–P2)** | `drawings/PRESENTATION_P1-P2.pdf` |
+
+> P1–P2 are **illustrative** (AI-rendered visuals in your sample's format) with our true
+> dimensions, zones, machines and flow overlaid as labels. Exact geometry, levels and
+> construction remain per the CAD set below.
+
+**CAD set (exact dimensions):**
+
 | Sheet | Title | Scale | File |
 |-------|-------|-------|------|
 | A101 | Site & Location Plan • Gatehouse • Setbacks | 1:200 | `drawings/A101_site_plan.pdf/.png/.svg` |
