@@ -59,13 +59,18 @@ def build_P1():
     fig.text(0.335, 0.89, '39,400', ha='center', va='bottom', fontsize=8, weight='bold', color=NAVY)
     fig.text(0.662, (0.885 + pbot) / 2, '10,170', ha='center', va='center', fontsize=8, weight='bold', color=NAVY, rotation=90)
     # badges 1-8
-    zones_x = [0.075, 0.215, 0.335, 0.475, 0.60, 0.705, 0.805, 0.945]
-    for i, zx in enumerate(zones_x):
-        badge(ax1, zx, 0.72, str(i + 1), fs=9)
-    # flow arrows between badges
-    for a, c in zip(zones_x[:-1], zones_x[1:]):
-        ax1.annotate('', xy=(c - 0.035, 0.30), xytext=(a + 0.035, 0.30),
-                     xycoords=ax1.transAxes, arrowprops=dict(arrowstyle='-|>', color=GREEN, lw=1.8))
+    badges = [(0.10, 0.28), (0.30, 0.33), (0.48, 0.33), (0.10, 0.72),
+              (0.37, 0.72), (0.80, 0.28), (0.70, 0.72), (0.945, 0.55)]
+    for i, (zx, zy) in enumerate(badges):
+        badge(ax1, zx, zy, str(i + 1), fs=9)
+    # flow path: raw->mix->extrude->(back)print->cut->qc->fg->dispatch
+    segs = [((0.155, 0.28), (0.245, 0.30)), ((0.355, 0.33), (0.42, 0.33)),
+            ((0.44, 0.42), (0.16, 0.62)), ((0.20, 0.68), (0.33, 0.67)),
+            ((0.50, 0.58), (0.70, 0.38)), ((0.79, 0.38), (0.735, 0.60)),
+            ((0.78, 0.66), (0.885, 0.56))]
+    for a, c in segs:
+        ax1.annotate('', xy=c, xytext=a, xycoords=ax1.transAxes,
+                     arrowprops=dict(arrowstyle='-|>', color=GREEN, lw=1.8))
     # utility core box
     ux = fig.add_axes([0.675, pbot, 0.31, ph]); ux.axis('off')
     ux.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor='#F5F7FA', edgecolor=NAVY, lw=1.2, transform=ux.transAxes))
@@ -85,37 +90,40 @@ def build_P1():
     # ---- Row 2: 3D cutaway band ----
     cut = load_crop('renders/pres_cutaway.jpg', 0.22, 0.90)
     ctop = zy - 0.075
-    # left annotation column
-    for j, t in enumerate(['CONTINUOUS RIDGE\nVENTILATORS', 'TRANSLUCENT\nSKYLIGHT STRIPS', 'PITCHED METAL ROOF\n38° (8m → 12m)']):
-        fig.text(0.015, ctop - 0.05 - j * 0.075, t, ha='left', va='center', fontsize=6.5, weight='bold', color=NAVY)
     ax2, cbot, ch = place_img(fig, cut, 0.115, ctop, 0.56, FW, FH)
+    # left annotation column (anchored to band)
+    for j, t in enumerate(['CONTINUOUS RIDGE\nVENTILATORS', 'TRANSLUCENT\nSKYLIGHT STRIPS', 'PITCHED METAL ROOF\n38° (8m → 12m)']):
+        fig.text(0.015, cbot + ch * (0.80 - j * 0.32), t, ha='left', va='center', fontsize=6.5, weight='bold', color=NAVY)
     # exhaust arrows
     for ex in [0.20, 0.50, 0.80]:
         ax2.text(ex, 0.94, '↑', transform=ax2.transAxes, ha='center', va='center', fontsize=14, weight='bold', color=RED)
     ax2.text(0.50, 0.985, 'HOT AIR EXHAUST', transform=ax2.transAxes, ha='center', va='bottom', fontsize=6, weight='bold', color=RED)
-    tag(ax2, 0.27, 0.30, 'M2–M4 EXTRUSION', fs=6, color=NAVY)
-    tag(ax2, 0.44, 0.30, 'PRINTING (WALLED)', fs=6, color=PURPLE)
-    tag(ax2, 0.90, 0.42, 'MEZZANINE OFFICES', fs=6, color=NAVY)
+    tag(ax2, 0.06, 0.12, 'RAW STORE', fs=6, color=NAVY)
+    tag(ax2, 0.21, 0.12, 'PRINTING (WALLED)', fs=6, color=PURPLE)
+    tag(ax2, 0.47, 0.12, 'M2–M4 EXTRUSION', fs=6, color=NAVY)
+    tag(ax2, 0.68, 0.12, 'CUT / SEAL', fs=6, color=NAVY)
+    tag(ax2, 0.87, 0.55, 'MEZZANINE OFFICES', fs=6, color=NAVY)
+    tag(ax2, 0.90, 0.12, 'FG STORE', fs=6, color=NAVY)
     # right column
-    fig.text(0.69, ctop - 0.04, 'MEZZANINE OFFICES\n+ DISPATCH (SOUTH)', ha='left', va='center', fontsize=6.5, weight='bold', color=NAVY,
+    fig.text(0.69, cbot + ch * 0.70, 'MEZZANINE OFFICES\n+ DISPATCH (SOUTH)', ha='left', va='center', fontsize=6.5, weight='bold', color=NAVY,
              bbox=dict(boxstyle='round,pad=0.3', fc='#E3F2FD', ec=NAVY))
-    fig.text(0.69, ctop - 0.11, 'WALLED PRINTING ROOM\n(chemicals, own entry E4)', ha='left', va='center', fontsize=6.5, weight='bold', color=PURPLE,
+    fig.text(0.69, cbot + ch * 0.40, 'WALLED PRINTING ROOM\n(chemicals, own entry E4)', ha='left', va='center', fontsize=6.5, weight='bold', color=PURPLE,
              bbox=dict(boxstyle='round,pad=0.3', fc='#F3E5F5', ec=PURPLE))
-    fig.text(0.69, ctop - 0.18, 'STEEL PORTAL @6.0m\n7 FRAMES, 39.40m', ha='left', va='center', fontsize=6.5, weight='bold', color='#333333',
+    fig.text(0.69, cbot + ch * 0.12, 'STEEL PORTAL @6.0m\n7 FRAMES, 39.40m', ha='left', va='center', fontsize=6.5, weight='bold', color='#333333',
              bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='#999999'))
 
     # ---- Row 3 ----
     rtop = cbot - 0.02
     side = load_crop('renders/pres_side.jpg', 0.02, 0.98)
-    sec = load_crop('renders/pres_section.jpg', 0.02, 0.98)
+    sec = load_crop('renders/pres_section.jpg', 0.10, 0.94)
     fig.text(0.015, rtop, 'SIDE ELEVATION', ha='left', va='bottom', fontsize=8, weight='bold', color=NAVY)
-    axs, sbot, sh = place_img(fig, side, 0.015, rtop - 0.005, 0.24, FW, FH)
-    fig.text(0.265, rtop, 'CROSS SECTION B–B (through extrusion)', ha='left', va='bottom', fontsize=8, weight='bold', color=NAVY)
-    axc, _, _ = place_img(fig, sec, 0.265, rtop - 0.005, 0.24, FW, FH)
+    axs, sbot, sh = place_img(fig, side, 0.015, rtop - 0.005, 0.28, FW, FH)
+    fig.text(0.305, rtop, 'CROSS SECTION B–B (through extrusion)', ha='left', va='bottom', fontsize=8, weight='bold', color=NAVY)
+    axc, _, _ = place_img(fig, sec, 0.305, rtop - 0.005, 0.28, FW, FH)
     tag(axs, 0.5, 0.06, '39,400', fs=7, color=NAVY)
     tag(axc, 0.5, 0.09, '10,170 SPAN • 12,000 APEX', fs=6, color=NAVY)
     # data + legend
-    dx = fig.add_axes([0.515, sbot, 0.20, sh]); dx.axis('off')
+    dx = fig.add_axes([0.595, sbot, 0.185, sh]); dx.axis('off')
     dx.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor='white', edgecolor=NAVY, lw=1.2, transform=dx.transAxes))
     dx.text(0.5, 0.94, 'BUILDING & DESIGN DATA', ha='center', va='center', fontsize=7.5, weight='bold', color=NAVY, transform=dx.transAxes)
     data = [('TOTAL SIZE', '39.40 × 10.17m'), ('EAVE HEIGHT', '8.0m'), ('RIDGE HEIGHT', '12.0m'), ('MEZZANINE', '+4.0m (95.6m²)'),
@@ -124,7 +132,7 @@ def build_P1():
         yy = 0.85 - j * 0.088
         dx.text(0.05, yy, k, ha='left', va='center', fontsize=6, color='#555555', transform=dx.transAxes)
         dx.text(0.95, yy, v, ha='right', va='center', fontsize=6, weight='bold', color=NAVY, transform=dx.transAxes)
-    lx = fig.add_axes([0.745, sbot, 0.24, sh]); lx.axis('off')
+    lx = fig.add_axes([0.79, sbot, 0.195, sh]); lx.axis('off')
     lx.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor='white', edgecolor=NAVY, lw=1.2, transform=lx.transAxes))
     lx.text(0.5, 0.94, 'LEGEND – PRODUCTION FLOW', ha='center', va='center', fontsize=7.5, weight='bold', color=NAVY, transform=lx.transAxes)
     leg = ['RAW MATERIALS STORE', 'MIXING & WEIGHING', 'BLOWN-FILM EXTRUSION', 'FLEXO PRINTING (WALLED)', 'CUTTING & HEAT-SEALING', 'QUALITY CONTROL LAB', 'FINISHED GOODS STORE', 'DISPATCH & LOADING']
@@ -132,9 +140,38 @@ def build_P1():
         yy = 0.85 - j * 0.088
         lx.text(0.08, yy, str(j + 1), ha='center', va='center', fontsize=6, weight='bold', color='white', transform=lx.transAxes,
                 bbox=dict(boxstyle='circle,pad=0.3', fc=NAVY, ec='none'))
-        lx.text(0.16, yy, t, ha='left', va='center', fontsize=6, color='#212121', transform=lx.transAxes)
+        lx.text(0.16, yy, t, ha='left', va='center', fontsize=5.5, color='#212121', transform=lx.transAxes)
     lx.annotate('', xy=(0.88, 0.045), xytext=(0.60, 0.045), arrowprops=dict(arrowstyle='-|>', color=GREEN, lw=1.8))
     lx.text(0.55, 0.045, 'FLOW', ha='right', va='center', fontsize=6, weight='bold', color=GREEN, transform=lx.transAxes)
+
+    # ---- Row 4: front elevation + aerial + features + machines ----
+    r4top = sbot - 0.018
+    r4bot = 0.038
+    front = load_crop('renders/pres_front.jpg', 0.02, 0.98)
+    aer = load_crop('renders/exterior_front.jpg', 0.25, 0.85)
+    af = front.shape[1] / front.shape[0]
+    aa = aer.shape[1] / aer.shape[0]
+    r4h = r4top - 0.018 - r4bot
+    fw = r4h * FH / FW * af
+    aw = r4h * FH / FW * aa
+    fig.text(0.015, r4top, 'FRONT ELEVATION (south)', ha='left', va='bottom', fontsize=8, weight='bold', color=NAVY)
+    axf, _, _ = place_img(fig, front, 0.015, r4top - 0.004, fw, FW, FH)
+    tag(axf, 0.5, 0.09, 'MAIN ENTRY + MEZZ WINDOWS', fs=6, color=NAVY)
+    fig.text(0.015 + fw + 0.01, r4top, 'AERIAL VIEW (gate + tanks)', ha='left', va='bottom', fontsize=8, weight='bold', color=NAVY)
+    axa, _, _ = place_img(fig, aer, 0.015 + fw + 0.01, r4top - 0.004, aw, FW, FH)
+    tag(axa, 0.5, 0.09, 'GATE + TANKS', fs=6, color=NAVY)
+    kx0 = 0.015 + fw + 0.01 + aw + 0.01
+    kx = fig.add_axes([kx0, r4bot, (0.985 - kx0) / 2 - 0.005, r4top - 0.004 - r4bot]); kx.axis('off')
+    kx.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor='#F5F7FA', edgecolor=NAVY, lw=1.2, transform=kx.transAxes))
+    kx.text(0.5, 0.90, 'KEY FEATURES', ha='center', va='center', fontsize=7.5, weight='bold', color=NAVY, transform=kx.transAxes)
+    for j, t in enumerate(['Linear N→S production flow', 'Walled print room + own entry', 'Mezz offices + utilities', 'Skylights + ridge ventilation', 'Decked gate/power + tanks']):
+        kx.text(0.06, 0.74 - j * 0.145, '✓  ' + t, ha='left', va='center', fontsize=6, color='#212121', transform=kx.transAxes)
+    mx0 = kx0 + (0.985 - kx0) / 2 + 0.005
+    mx = fig.add_axes([mx0, r4bot, 0.985 - mx0, r4top - 0.004 - r4bot]); mx.axis('off')
+    mx.add_patch(plt.Rectangle((0, 0), 1, 1, facecolor='white', edgecolor=NAVY, lw=1.2, transform=mx.transAxes))
+    mx.text(0.5, 0.90, 'MACHINE / AREA LIST', ha='center', va='center', fontsize=7.5, weight='bold', color=NAVY, transform=mx.transAxes)
+    for j, t in enumerate(['M1 Mixing / Weighing', 'M2–M4 Blown-film extrusion', 'M5–M6 Flexo printing (walled)', 'M7–M9 Cutting / Heat-seal', 'M10 QC bench · M11 Granulator']):
+        mx.text(0.06, 0.74 - j * 0.145, '•  ' + t, ha='left', va='center', fontsize=6, color='#212121', transform=mx.transAxes)
 
     fig.text(0.5, 0.022, 'ILLUSTRATIVE PRESENTATION SHEET (indicative visuals) — EXACT DIMENSIONS, LEVELS & CONSTRUCTION PER CAD SET A101–A301  •  VERIFY ON SITE', ha='center', va='center', fontsize=6.5, style='italic', color='#555555')
     fig.text(0.985, 0.022, 'P1 • P01', ha='right', va='center', fontsize=7, weight='bold', color=NAVY)
@@ -158,8 +195,9 @@ def build_P2():
     plan = load_crop('renders/pres_plan_topdown.jpg', 0.27, 0.72)
     fig.text(0.03, 0.938, 'GROUND FLOOR PLAN (Production hall 39.40 × 10.17m — N on left)', ha='left', va='center', fontsize=9, weight='bold', color=NAVY)
     axp, pbot, _ = place_img(fig, plan, 0.03, 0.928, 0.94, FW, FH)
-    for i, zx in enumerate([0.075, 0.215, 0.335, 0.475, 0.60, 0.705, 0.805, 0.945]):
-        badge(axp, zx, 0.70, str(i + 1), fs=8)
+    for i, (zx, zy) in enumerate([(0.10, 0.28), (0.30, 0.33), (0.48, 0.33), (0.10, 0.72),
+                                    (0.37, 0.72), (0.80, 0.28), (0.70, 0.72), (0.945, 0.55)]):
+        badge(axp, zx, zy, str(i + 1), fs=8)
     fig.text(0.03, pbot - 0.008, '→  Material flow N→S (1→8)      ◆  Printing (4) walled + own entry E4      ■  Machine (red = equipment, not walls)      E1–E7 = entrances (see A102)',
              ha='left', va='top', fontsize=6.5, color='#333333')
 
@@ -185,16 +223,16 @@ def build_P2():
              bbox=dict(boxstyle='round,pad=0.25', fc=NAVY, ec='none'))
     axl.text(0.03, 0.62, 'EAVES +8.0', transform=axl.transAxes, ha='left', va='center', fontsize=6, weight='bold', color='white',
              bbox=dict(boxstyle='round,pad=0.25', fc=NAVY, ec='none'))
-    axl.text(0.97, 0.30, 'MEZZ +4.0', transform=axl.transAxes, ha='right', va='center', fontsize=6, weight='bold', color='white',
+    axl.text(0.93, 0.45, 'MEZZ +4.0', transform=axl.transAxes, ha='right', va='center', fontsize=6, weight='bold', color='white',
              bbox=dict(boxstyle='round,pad=0.25', fc=NAVY, ec='none'))
     fig.text(0.515, btop, '3D CUTAWAY VIEW (without roof)', ha='left', va='bottom', fontsize=9, weight='bold', color=NAVY)
     axo = load_crop('renders/pres_axono2.jpg', 0.02, 0.98)
     ax3, abot, _ = place_img(fig, axo, 0.515, btop - 0.005, 0.455, FW, FH)
     lbot = min(lbot, abot)
-    calls = [((0.10, 0.60), (0.03, 0.78), 'RAW STORE'), ((0.24, 0.50), (0.20, 0.72), 'MIXING'),
-             ((0.37, 0.55), (0.36, 0.76), 'EXTRUSION'), ((0.50, 0.44), (0.50, 0.24), 'PRINTING'),
-             ((0.60, 0.36), (0.63, 0.18), 'CUT / SEAL'), ((0.72, 0.28), (0.76, 0.12), 'QC LAB'),
-             ((0.79, 0.44), (0.88, 0.62), 'FG STORE'), ((0.90, 0.40), (0.97, 0.55), 'MEZZ + DISPATCH')]
+    calls = [((0.07, 0.55), (0.03, 0.78), 'RAW STORE'), ((0.22, 0.55), (0.16, 0.86), 'PRINTING'),
+             ((0.37, 0.50), (0.38, 0.86), 'MIXING'), ((0.47, 0.66), (0.55, 0.86), 'EXTRUSION'),
+             ((0.57, 0.52), (0.62, 0.24), 'CUT / SEAL'), ((0.68, 0.68), (0.75, 0.86), 'FG STORE'),
+             ((0.73, 0.38), (0.80, 0.14), 'QC LAB'), ((0.89, 0.45), (0.96, 0.62), 'MEZZ + DISPATCH')]
     for (fx, fy), (tx, ty), lab in calls:
         ax3.plot([fx], [fy], marker='o', ms=4, mfc=RED, mec='white', mew=1, transform=ax3.transAxes, zorder=9)
         ax3.annotate(lab, xy=(fx, fy), xytext=(tx, ty), xycoords=ax3.transAxes, textcoords=ax3.transAxes,
@@ -205,7 +243,7 @@ def build_P2():
     # ---- extra views row: cross section + aerial ----
     xtop = lbot - 0.03
     fig.text(0.03, xtop, 'CROSS SECTION B–B (indicative)', ha='left', va='bottom', fontsize=9, weight='bold', color=NAVY)
-    csec = load_crop('renders/pres_section_long.jpg', 0.05, 0.95)
+    csec = load_crop('renders/pres_section.jpg', 0.12, 0.92)
     axx1, xbot1, _ = place_img(fig, csec, 0.03, xtop - 0.005, 0.455, FW, FH)
     tag(axx1, 0.5, 0.08, '10,170 SPAN • 12,000 APEX', fs=6, color=NAVY)
     fig.text(0.515, xtop, 'AERIAL VIEW (from main road — gate + tanks)', ha='left', va='bottom', fontsize=9, weight='bold', color=NAVY)
